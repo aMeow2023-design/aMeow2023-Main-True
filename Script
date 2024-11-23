@@ -1,0 +1,203 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local espEnabled = true
+
+-- Function to create the main GUI
+local function createMainGui()
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "LIL HAX"
+    screenGui.Parent = playerGui
+
+    -- Create Main Frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0.4, 0, 0.6, 0)
+    mainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    -- Add Title
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, 0, 0.15, 0)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.SourceSansBold
+    title.TextSize = 24
+    title.Text = "LIL HAX"
+    title.Parent = mainFrame
+
+    -- Close Button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0.1, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(0.9, -5, 0, 5)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.Font = Enum.Font.SourceSansBold
+    closeButton.TextSize = 18
+    closeButton.Text = "X"
+    closeButton.Parent = mainFrame
+
+    -- Close Button Functionality
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    -- Add Buttons Section
+    local buttonContainer = Instance.new("Frame")
+    buttonContainer.Name = "ButtonContainer"
+    buttonContainer.Size = UDim2.new(1, 0, 0.85, 0)
+    buttonContainer.Position = UDim2.new(0, 0, 0.15, 0)
+    buttonContainer.BackgroundTransparency = 1
+    buttonContainer.Parent = mainFrame
+
+    -- Teleport to Player Button
+    local function teleportToPlayer()
+        -- Create ScrollFrame to list all players
+        local scrollFrame = Instance.new("ScrollingFrame")
+        scrollFrame.Size = UDim2.new(0.8, 0, 0.5, 0)
+        scrollFrame.Position = UDim2.new(0.1, 0, 0.1, 0)
+        scrollFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        scrollFrame.ScrollBarThickness = 10
+        scrollFrame.Parent = mainFrame
+
+        -- Create UIListLayout for scrolling
+        local uiListLayout = Instance.new("UIListLayout")
+        uiListLayout.FillDirection = Enum.FillDirection.Vertical
+        uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        uiListLayout.Parent = scrollFrame
+
+        -- Add Player Buttons
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer ~= player then
+                local playerButton = Instance.new("TextButton")
+                playerButton.Size = UDim2.new(1, 0, 0, 40)
+                playerButton.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
+                playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                playerButton.Font = Enum.Font.SourceSansBold
+                playerButton.TextSize = 18
+                playerButton.Text = otherPlayer.Name
+                playerButton.Parent = scrollFrame
+
+                playerButton.MouseButton1Click:Connect(function()
+                    -- Teleport to selected player
+                    if otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        player.Character.HumanoidRootPart.CFrame = otherPlayer.Character.HumanoidRootPart.CFrame
+                        -- Remove the scrollFrame after teleporting
+                        scrollFrame:Destroy()
+                    end
+                end)
+            end
+        end
+    end
+
+    -- Teleport to Random Player Button
+    local function teleportToRandomPlayer()
+        local randomPlayer = game.Players:GetPlayers()[math.random(1, #game.Players:GetPlayers())]
+        if randomPlayer.Character and randomPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = randomPlayer.Character.HumanoidRootPart.CFrame
+        end
+    end
+
+    -- ESP Button
+    local function toggleESP()
+        espEnabled = not espEnabled
+
+        -- Enable ESP for all players
+        for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+            if otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") then
+                local espBox = otherPlayer.Character:FindFirstChild("ESPBox")
+                if espEnabled then
+                    if not espBox then
+                        espBox = Instance.new("BoxHandleAdornment")
+                        espBox.Name = "ESPBox"
+                        espBox.Adornee = otherPlayer.Character.Head
+                        espBox.Size = Vector3.new(3, 3, 3)
+                        espBox.Color3 = Color3.fromRGB(255, 0, 0)
+                        espBox.Transparency = 0.5
+                        espBox.Parent = otherPlayer.Character
+                    end
+                else
+                    if espBox then
+                        espBox:Destroy()
+                    end
+                end
+            end
+        end
+    end
+
+    -- Teleport to Random Player Button
+    local teleportRandomButton = Instance.new("TextButton")
+    teleportRandomButton.Name = "TeleportRandomButton"
+    teleportRandomButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    teleportRandomButton.Position = UDim2.new(0.1, 0, 0.25, 0)
+    teleportRandomButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    teleportRandomButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    teleportRandomButton.Font = Enum.Font.SourceSansBold
+    teleportRandomButton.TextSize = 18
+    teleportRandomButton.Text = "Teleport to Random Player"
+    teleportRandomButton.Parent = buttonContainer
+
+    teleportRandomButton.MouseButton1Click:Connect(teleportToRandomPlayer)
+
+    -- ESP Button
+    local espButton = Instance.new("TextButton")
+    espButton.Name = "ESPButton"
+    espButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    espButton.Position = UDim2.new(0.1, 0, 0.35, 0)
+    espButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    espButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    espButton.Font = Enum.Font.SourceSansBold
+    espButton.TextSize = 18
+    espButton.Text = "Toggle ESP"
+    espButton.Parent = buttonContainer
+
+    espButton.MouseButton1Click:Connect(toggleESP)
+
+    -- Teleport to Player Button
+    local teleportButton = Instance.new("TextButton")
+    teleportButton.Name = "TeleportButton"
+    teleportButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    teleportButton.Position = UDim2.new(0.1, 0, 0.45, 0)
+    teleportButton.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    teleportButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    teleportButton.Font = Enum.Font.SourceSansBold
+    teleportButton.TextSize = 18
+    teleportButton.Text = "Teleport to Player"
+    teleportButton.Parent = buttonContainer
+
+    teleportButton.MouseButton1Click:Connect(teleportToPlayer)
+
+    -- Dragging Functionality
+    local dragStart, startPos
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragStart = input.Position
+            startPos = mainFrame.Position
+        end
+    end
+
+    local function onInputChanged(input)
+        if dragStart then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end
+
+    local function onInputEnded(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragStart = nil
+        end
+    end
+
+    mainFrame.InputBegan:Connect(onInputBegan)
+    mainFrame.InputChanged:Connect(onInputChanged)
+    mainFrame.InputEnded:Connect(onInputEnded)
+end
+
+-- Show GUI
+createMainGui()
